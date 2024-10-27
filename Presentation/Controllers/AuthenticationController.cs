@@ -16,35 +16,55 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("login")]
-
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var response = await _authenticationService.LoginAsync(request, cancellationToken);
 
-            return Ok(response);
-        }
-        catch (Exception e)
+        var response = await _authenticationService.LoginAsync(request, cancellationToken);
+
+        if (response.Success)
         {
-            return Unauthorized(e.Message);
+            return Ok(response.Data);
         }
 
+        return Unauthorized(response.Message);
+    }
+
+    [HttpPost("register-user")]
+    public async Task<IActionResult> RegistUser([FromBody] RegisterUserRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _authenticationService.RegisterUserAsync(request, cancellationToken);
+
+        if (response.Success)
+        {
+            return Ok(response.Data);
+        }
+
+        return BadRequest(response.Message);
     }
 
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
-        try
-        {
-            var response = await _authenticationService.RefreshTokenAsync(request);
+        var response = await _authenticationService.RefreshTokenAsync(request);
 
-            return Ok(response);
-        }
-        catch (Exception e)
+        if (response.Success)
         {
-            return Unauthorized(e.Message);
+            return Ok(response.Data);
         }
+
+        return Unauthorized(response.Message);
     }
 
+    [HttpPost("revoke-token")]
+    public async Task<IActionResult> RevokeToke([FromBody] RevokeRefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _authenticationService.RevokeRefreshTokenAsync(request, cancellationToken);
+
+        if (response.Success)
+        {
+            return Ok(response.Data);
+        }
+
+        return NotFound(response.Message);
+    }
 }

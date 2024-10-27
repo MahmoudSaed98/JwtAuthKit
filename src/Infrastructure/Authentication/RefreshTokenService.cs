@@ -34,40 +34,37 @@ internal sealed class RefreshTokenService : IRefreshTokenService
     {
         var expires = _dateTimeProvider.UtcNow.AddMinutes(_jwtSettings.RefreshTokenExpirationInMinutes);
 
-        string token = GenerateRefreshTokenInternal();
+        string generatedValue = GenerateRefreshTokenInternal();
 
-        var tokenEntity = RefreshToken.Create(token, userId, expires);
+        var newToken = RefreshToken.Create(generatedValue, userId, expires);
 
-        _refreshTokenRepository.Insert(tokenEntity);
+        _refreshTokenRepository.Insert(newToken);
 
-        return tokenEntity;
+        return newToken;
     }
 
     public async Task<RefreshToken?> GetRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        return await _refreshTokenRepository.GetAsync(refreshToken, cancellationToken);
+        return await _refreshTokenRepository.
+            GetAsync(refreshToken, cancellationToken);
     }
 
     public async Task RevokeAllRefreshTokensForUserAsync(int userId, CancellationToken cancellationToken = default)
     {
-        var selectedUser = await _userRepository.GetByIdAsync(userId, cancellationToken);
-
-        if (selectedUser is null)
-        {
-            throw new Exception($"user with {userId} was not found.");
-        }
-
-        foreach (var token in selectedUser.RefreshTokens)
-        {
-            token.Revoke();
-        }
+        await _refreshTokenRepository.
+            RevokeAllRefreshTokensForUserAsync(userId, cancellationToken);
     }
 
     public async Task RevokeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         var tokenToRevoke = await _refreshTokenRepository.GetAsync(refreshToken);
 
-        tokenToRevoke!.Revoke();
+        if (tokenToRevoke != null)
+        {
+            tokenToRevoke.Revoke();
+        }
+
+        throw new Exception("token not found.");
     }
 
     public async Task<bool> ValidateRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
@@ -77,13 +74,8 @@ internal sealed class RefreshTokenService : IRefreshTokenService
             throw new Exception("refresh token is null or empty");
         }
 
-        var seletedRefreshToken = await _refreshTokenRepository.GetAsync(refreshToken, cancellationToken);
-
-        if (seletedRefreshToken is null)
-            return false;
-
-        return !seletedRefreshToken.IsRevoked &&
-                seletedRefreshToken.ExpiresAt > DateTime.UtcNow;
+        return await _refreshTokenRepository.
+            IsValidRefreshToken(refreshToken, cancellationToken);
     }
 
     private static string GenerateRefreshTokenInternal()

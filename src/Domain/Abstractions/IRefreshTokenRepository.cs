@@ -10,7 +10,9 @@ public interface IRefreshTokenRepository
 
     void Remove(RefreshToken refreshToken);
 
-    Task<bool> IsRefreshTokenExpiredAsync(string refreshToken, CancellationToken cancellationToken = default);
+    Task<bool> IsValidRefreshToken(string refreshToken, CancellationToken cancellationToken = default);
 
     Task<RefreshToken?> GetByUserIdAsync(int userId, CancellationToken cancellationToken = default);
+
+    Task<bool> RevokeAllRefreshTokensForUserAsync(int userId, CancellationToken cancellationToken = default);
 }

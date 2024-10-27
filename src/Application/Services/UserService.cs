@@ -59,8 +59,6 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork
 
     public async Task<UserResponse?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrEmpty(username, nameof(username));
-
         var user = await userRepository.GetByUsernameAsync(username, cancellationToken);
 
         if (user == null)
@@ -70,10 +68,4 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork
 
         return new UserResponse(user.Id, user.Username, user.Email);
     }
-
-
-
-
-
-
 }

@@ -43,7 +43,6 @@ public class UserController : ControllerBase
 
     [Authorize]
     [HttpGet("get-by-username/{username}")]
-
     public async Task<IActionResult> GetByUsername(string username, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(username))

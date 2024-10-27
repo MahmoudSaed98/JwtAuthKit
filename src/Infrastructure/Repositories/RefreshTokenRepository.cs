@@ -33,15 +33,26 @@ internal sealed class RefreshTokenRepository : IRefreshTokenRepository
         _dbContext.Set<RefreshToken>().Add(refreshToken);
     }
 
-    public async Task<bool> IsRefreshTokenExpiredAsync(string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<bool> IsValidRefreshToken(string refreshToken, CancellationToken cancellationToken = default)
     {
         return await _dbContext
-                         .Set<RefreshToken>()
-                         .AnyAsync(r => DateTime.UtcNow >= r.ExpiresAt, cancellationToken);
+                     .Set<RefreshToken>()
+                     .AnyAsync(r => !r.IsRevoked && DateTime.UtcNow > r.ExpiresAt
+                                                     && r.Token == refreshToken, cancellationToken);
     }
 
     public void Remove(RefreshToken refreshToken)
     {
         _dbContext.Set<RefreshToken>().Remove(refreshToken);
+    }
+
+    public async Task<bool> RevokeAllRefreshTokensForUserAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        int affectedRows = await _dbContext.Set<RefreshToken>()
+                          .Where(r => r.UserId == userId && !r.IsRevoked)
+       .ExecuteUpdateAsync(tokenProperty => tokenProperty.SetProperty(token => token.IsRevoked, true)
+                          .SetProperty(token => token.RevokedAt, DateTime.UtcNow));
+
+        return affectedRows > 0;
     }
 }
