@@ -6,6 +6,8 @@ public interface IRefreshTokenService
 {
     RefreshToken GenerateRefreshToken(int userId);
 
+    void Delete(RefreshToken refreshToken);
+
     Task<bool> ValidateRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
 
     Task RevokeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);

@@ -34,13 +34,13 @@ internal sealed class RefreshTokenService : IRefreshTokenService
     {
         var expires = _dateTimeProvider.UtcNow.AddMinutes(_jwtSettings.RefreshTokenExpirationInMinutes);
 
-        string generatedValue = GenerateRefreshTokenInternal();
+        string generatedRefreshTokenValue = GenerateRefreshTokenInternal();
 
-        var newToken = RefreshToken.Create(generatedValue, userId, expires);
+        var newRefreshToken = RefreshToken.Create(generatedRefreshTokenValue, userId, _dateTimeProvider.UtcNow, expires);
 
-        _refreshTokenRepository.Insert(newToken);
+        _refreshTokenRepository.Insert(newRefreshToken);
 
-        return newToken;
+        return newRefreshToken;
     }
 
     public async Task<RefreshToken?> GetRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
@@ -71,7 +71,7 @@ internal sealed class RefreshTokenService : IRefreshTokenService
     {
         if (string.IsNullOrEmpty(refreshToken))
         {
-            throw new Exception("refresh token is null or empty");
+            return false;
         }
 
         return await _refreshTokenRepository.
@@ -83,4 +83,8 @@ internal sealed class RefreshTokenService : IRefreshTokenService
         return Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
     }
 
+    public void Delete(RefreshToken refreshToken)
+    {
+        _refreshTokenRepository.Remove(refreshToken);
+    }
 }

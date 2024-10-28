@@ -64,14 +64,14 @@ internal class AuthenticationService(IUserRepository userRepository, IPasswordHa
 
         string? username = accessTokenService.GetUsernameCliam(claimsPrincipal);
 
-        var user = await userRepository.GetByUsernameAsync(username!.Trim(), cancellationToken);
+        var user = await userRepository.GetByUsernameAsync(username!, cancellationToken);
 
         if (user!.Id != storedRefreshToken.UserId)
         {
             return ApiResponse<RefreshTokenResponse>.Failure(ErrorMessages.RefreshTokenUserMismatch);
         }
 
-        storedRefreshToken.Revoke();
+        refreshTokenService.Delete(storedRefreshToken);
 
         string newAccessToken = accessTokenService.GenerateAccessToken(user)!;
 

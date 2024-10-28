@@ -1,6 +1,6 @@
 ﻿namespace Infrastructure.Claims;
 
-internal sealed class CustomPublicClaims
+internal sealed class CustomClaims
 {
     public const string Username = "username";
 

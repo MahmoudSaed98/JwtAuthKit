@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Requests;
 using Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
+using Domain.Enums;
+using Infrastructure.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -17,7 +18,7 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [Authorize]
+    [HasPermission(Permission.ReadUser)]
     [HttpGet("get-user-by-id/{id}")]
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
@@ -26,7 +27,7 @@ public class UserController : ControllerBase
         return user is null ? NotFound("user not found.") : Ok(user);
     }
 
-    [Authorize]
+    [HasPermission(Permission.ReadUser)]
     [HttpGet("get-by-email/{email}")]
     public async Task<IActionResult> GetByEmail(string email, CancellationToken cancellationToken)
     {
@@ -41,7 +42,7 @@ public class UserController : ControllerBase
         return user is null ? NotFound("user not found.") : Ok(user);
     }
 
-    [Authorize]
+    [HasPermission(Permission.ReadUser)]
     [HttpGet("get-by-username/{username}")]
     public async Task<IActionResult> GetByUsername(string username, CancellationToken cancellationToken)
     {
@@ -56,7 +57,7 @@ public class UserController : ControllerBase
     }
 
 
-    [Authorize]
+    [HasPermission(Permission.UpdateUser)]
     [HttpPut("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request,
         CancellationToken cancellationToken)

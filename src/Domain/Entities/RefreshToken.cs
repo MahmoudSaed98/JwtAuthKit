@@ -9,19 +9,19 @@ public sealed class RefreshToken : Entity<int>
     public bool IsRevoked { get; private set; }
     public DateTime? RevokedAt { get; private set; }
 
-    private RefreshToken(string token, int userId, DateTime expiresAt)
+    private RefreshToken(string token, int userId, DateTime issuedAt, DateTime expiresAt)
     {
         ArgumentException.ThrowIfNullOrEmpty(token, nameof(token));
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(expiresAt, DateTime.UtcNow);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(expiresAt, issuedAt);
 
         this.Token = token;
         this.ExpiresAt = expiresAt;
-        this.IssuedAt = DateTime.UtcNow;
+        this.IssuedAt = issuedAt;
         this.UserId = userId;
     }
 
-    public static RefreshToken Create(string token, int userId, DateTime expiresAt) =>
-                                                           new(token, userId, expiresAt);
+    public static RefreshToken Create(string token, int userId, DateTime issuedAt, DateTime expiresAt) =>
+                                                           new(token, userId, issuedAt, expiresAt);
     public void Revoke()
     {
         if (IsRevoked)

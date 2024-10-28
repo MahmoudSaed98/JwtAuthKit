@@ -44,18 +44,27 @@ internal sealed class AccessTokenService : IAccessTokenService
         var issuedAtUnix = ((DateTimeOffset)issuedAt).ToUnixTimeSeconds();
         var expiresAt = issuedAt.AddMinutes(_settings.AccessTokenExpirationInMinutes);
 
-        var claims = new[]
-        {
-          new Claim(CustomPublicClaims.Email,user.Email),
+        List<Claim> claims =
+        [
+          new Claim(CustomClaims.Email,user.Email),
 
-          new Claim(CustomPublicClaims.Username,user.Username),
+          new Claim(CustomClaims.Username,user.Username),
 
-          new Claim(JwtRegisteredClaimNames.Sub,user.Id.ToString()),
+          new Claim("sub",user.Id.ToString()),
 
           new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
 
           new Claim(JwtRegisteredClaimNames.Iat,issuedAtUnix.ToString())
-        };
+        ];
+
+        if (user.Roles.Any())
+        {
+            foreach (var role in user.Roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role.Name));
+            }
+        }
+
 
         var descriptor = new SecurityTokenDescriptor
         {
@@ -89,12 +98,12 @@ internal sealed class AccessTokenService : IAccessTokenService
 
     public string? GetEmailClaim(ClaimsPrincipal principal)
     {
-        return GetClaim(principal, CustomPublicClaims.Email);
+        return GetClaim(principal, CustomClaims.Email);
     }
 
     public string? GetUsernameCliam(ClaimsPrincipal principal)
     {
-        return GetClaim(principal, CustomPublicClaims.Username);
+        return GetClaim(principal, CustomClaims.Username);
     }
 
     private ClaimsPrincipal VlidateAccessToken(string accessToken, TokenValidationParameters tokenValidationParameters)

@@ -3,11 +3,13 @@
 public class User : Entity<int>
 {
     private List<RefreshToken> _refreshTokens = new List<RefreshToken>();
+    private List<Role> _roles = new List<Role>();
 
     public string Username { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;
     public IReadOnlyList<RefreshToken> RefreshTokens => _refreshTokens;
+    public IReadOnlyList<Role> Roles => _roles;
     private User(string username, string passwordHash, string email)
     {
         ArgumentException.ThrowIfNullOrEmpty(username, nameof(username));

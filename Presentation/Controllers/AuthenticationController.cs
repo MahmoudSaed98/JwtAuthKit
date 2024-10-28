@@ -9,7 +9,6 @@ namespace Presentation.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly IAuthenticationService _authenticationService;
-
     public AuthenticationController(IAuthenticationService authenticationService)
     {
         _authenticationService = authenticationService;
@@ -18,7 +17,6 @@ public class AuthenticationController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-
         var response = await _authenticationService.LoginAsync(request, cancellationToken);
 
         if (response.Success)
@@ -30,7 +28,7 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("register-user")]
-    public async Task<IActionResult> RegistUser([FromBody] RegisterUserRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequest request, CancellationToken cancellationToken)
     {
         var response = await _authenticationService.RegisterUserAsync(request, cancellationToken);
 

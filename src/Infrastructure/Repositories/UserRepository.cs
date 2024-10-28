@@ -11,14 +11,15 @@ internal class UserRepository : Repository<int, User>, IUserRepository
         : base(context) { }
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Set<User>().FirstOrDefaultAsync(x => x.Email == email,
-            cancellationToken);
+        return await dbContext.Set<User>()
+                              .Include(user => user.Roles)
+                              .FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
     }
 
-    public Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
+    public Task<User?> GetByUsernameAsync(string? username, CancellationToken cancellationToken = default)
     {
-        return dbContext.Set<User>().FirstOrDefaultAsync(x => x.Username == username,
-            cancellationToken);
+        return dbContext.Set<User>().Include(user => user.Roles)
+                        .FirstOrDefaultAsync(x => x.Username == username, cancellationToken);
     }
 
     public async Task<bool> IsEmailUniqueAsync(string email, CancellationToken cancellationToken = default)
