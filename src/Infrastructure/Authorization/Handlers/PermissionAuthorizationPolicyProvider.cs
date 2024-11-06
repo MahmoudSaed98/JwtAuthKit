@@ -11,15 +11,18 @@ internal sealed class PermissionAuthorizationPolicyProvider : DefaultAuthorizati
     { }
     public override async Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
     {
-        AuthorizationPolicy? policy = await base.GetPolicyAsync(policyName);
+        var policy = await base.GetPolicyAsync(policyName);
 
-        if (policy is not null)
+        if (policy is null && PolicyHelper.IsValidPolicyName(policyName))
         {
-            return policy;
+
+            var requiredPermission = PolicyHelper.GetPolicyPermissions(policyName);
+
+            policy = new AuthorizationPolicyBuilder()
+                         .AddRequirements(new PermissionRequirement(requiredPermission))
+                         .Build();
         }
 
-        return new AuthorizationPolicyBuilder()
-                  .AddRequirements(new PermissionRequirement(policyName))
-                  .Build();
+        return policy;
     }
 }

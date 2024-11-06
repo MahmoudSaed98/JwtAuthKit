@@ -9,6 +9,21 @@ internal class UserRepository : Repository<int, User>, IUserRepository
 {
     public UserRepository(ApplicationDbContext context)
         : base(context) { }
+
+    public override Task<User?> GetByIdAsync(int key, CancellationToken cancellationToken = default)
+    {
+        return dbContext.Set<User>()
+                        .Include(x => x.Roles)
+                        .FirstOrDefaultAsync(x => x.Id == key, cancellationToken);
+    }
+
+    public async Task<IEnumerable<User>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Set<User>()
+                               .Include(x => x.Roles)
+                              .ToListAsync(cancellationToken);
+    }
+
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return await dbContext.Set<User>()

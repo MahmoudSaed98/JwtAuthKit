@@ -25,4 +25,8 @@ internal static class ErrorMessages
     // Password Management Errors
     public const string PasswordMismatch = "Passwords do not match.";
     public const string PasswordResetFailed = "Password reset failed. Please try again.";
+
+    // User Errors
+    public const string RoleRequired = "User must have at least one role assigned.";
+    public const string CannotDeleteAdmin = "Admin users cannot be deleted.";
 }

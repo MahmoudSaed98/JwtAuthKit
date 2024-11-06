@@ -2,19 +2,33 @@
 
 namespace Domain.Entities;
 
-public class Role : Enumeration<Role>
+public class Role : Entity<int>
 {
-
-    public readonly static Role Registered = new Role(1, "Registered");
-
-    public readonly static Role Admin = new Role(2, "Admin");
-
-    public ICollection<User> Users { get; private set; } = new List<User>();
-    public ICollection<Permission> Permissions { get; private set; } = new List<Permission>();
-    public Role(int value, string name)
-        : base(value, name)
+    public string Name { get; private set; }
+    public Permissions Permissions { get; private set; }
+    public IReadOnlyList<User> Users { get; private set; } = new List<User>();
+    public Role(string name)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(name);
+        this.Name = name;
+    }
+    private Role()  // Called by ef core
     {
     }
 
-    private Role() { }
+    public void SetName(string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        this.Name = name;
+    }
+
+    public void GrantPermission(Permissions permission)
+    {
+        this.Permissions = (this.Permissions | permission);
+    }
+
+    public void RevokePermission(Permissions permissionToRevoke)
+    {
+        this.Permissions = (this.Permissions & ~permissionToRevoke);
+    }
 }

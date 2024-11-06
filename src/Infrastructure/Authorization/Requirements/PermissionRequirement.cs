@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Infrastructure.Authorization.Requirements;
 
 public class PermissionRequirement : IAuthorizationRequirement
 {
-    public string Permission { get; }
-    public PermissionRequirement(string permission)
+    public Permissions Permission { get; }
+
+    public PermissionRequirement(Permissions permission)
     {
         Permission = permission;
     }

@@ -19,9 +19,9 @@ public class AuthenticationController : ControllerBase
     {
         var response = await _authenticationService.LoginAsync(request, cancellationToken);
 
-        if (response.Success)
+        if (response.IsSuccess)
         {
-            return Ok(response.Data);
+            return Ok(response.Value);
         }
 
         return Unauthorized(response.Message);
@@ -32,9 +32,9 @@ public class AuthenticationController : ControllerBase
     {
         var response = await _authenticationService.RegisterUserAsync(request, cancellationToken);
 
-        if (response.Success)
+        if (response.IsSuccess)
         {
-            return Ok(response.Data);
+            return Ok(response.Value);
         }
 
         return BadRequest(response.Message);
@@ -45,9 +45,9 @@ public class AuthenticationController : ControllerBase
     {
         var response = await _authenticationService.RefreshTokenAsync(request);
 
-        if (response.Success)
+        if (response.IsSuccess)
         {
-            return Ok(response.Data);
+            return Ok(response.Value);
         }
 
         return Unauthorized(response.Message);
@@ -58,9 +58,9 @@ public class AuthenticationController : ControllerBase
     {
         var response = await _authenticationService.RevokeRefreshTokenAsync(request, cancellationToken);
 
-        if (response.Success)
+        if (response.IsSuccess)
         {
-            return Ok(response.Data);
+            return Ok(response.Value);
         }
 
         return NotFound(response.Message);

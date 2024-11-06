@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Requests;
+﻿using Application.Common;
+using Application.DTOs.Requests;
 using Application.DTOs.Responses;
 using Application.Interfaces;
 using Domain.Abstractions;
@@ -6,29 +7,68 @@ using Domain.Abstractions;
 namespace Application.Services;
 
 public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork
-    , IPasswordHasher passwordHasher) : IUserService
+    , IPasswordHasher passwordHasher, IPermissionManager permissionManager) : IUserService
 {
-    public async Task<bool> ChangePasswordAsync(ChangePasswordRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> ChangePasswordAsync(ChangePasswordRequest request, CancellationToken cancellationToken = default)
     {
         var user = await userRepository.GetByEmailAsync(request.Email, cancellationToken);
 
         if (user == null)
         {
-            return false;
+            return Result<string>.Failure($"no user found with email '{request.Email}'");
         }
 
         if (!passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
         {
-            return false;
+            return Result<string>.Failure(ErrorMessages.PasswordMismatch);
         }
 
-        string newHashedPassword = passwordHasher.Hash(request.NewPassword);
+        string newHashPassword = passwordHasher.Hash(request.NewPassword);
 
-        user.SetPassword(newHashedPassword);
+        user.SetPassword(newHashPassword);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Result<string>.Success(SuccessMessages.PasswordChangedSuccessfully);
+    }
+
+    public async Task<Result<string>> DeleteUserAsync(string username, CancellationToken cancellationToken = default)
+    {
+        var existingUser = await userRepository.GetByUsernameAsync(username, cancellationToken);
+
+        if (existingUser is null)
+        {
+            return Result<string>.Failure($"user with username '{username}' does not exist.");
+        }
+
+        var isAdmin = existingUser.Roles
+                    .Any(x => permissionManager.IsAdmin(x.Permissions));
+
+        if (isAdmin)
+        {
+            return Result<string>.Failure(ErrorMessages.CannotDeleteAdmin);
+        }
+
+        userRepository.Update(existingUser);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<string>.Success($"user with username '{username}' has been deleted.");
+    }
+
+    public async Task<IEnumerable<UserResponse>> GetAllUsersAsync(CancellationToken cancellationToken = default)
+    {
+        var users = await userRepository.GetAllAsync(cancellationToken);
+
+        if (users is null)
+        {
+            return Enumerable.Empty<UserResponse>();
+        }
+
+
+        return users.Select(x => new UserResponse(x.Id, x.Username, x.Email,
+            x.Roles.Select(r => r.Name).ToList()));
+
     }
 
     public async Task<UserResponse?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
@@ -42,7 +82,9 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork
             return null;
         }
 
-        return new UserResponse(user.Id, user.Username, user.Email);
+        var roles = user.Roles.Select(x => x.Name).ToList();
+
+        return new UserResponse(user.Id, user.Username, user.Email, roles);
     }
 
     public async Task<UserResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -54,7 +96,9 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork
             return null;
         }
 
-        return new UserResponse(user.Id, user.Username, user.Email);
+        var roles = user.Roles.Select(x => x.Name).ToList();
+
+        return new UserResponse(user.Id, user.Username, user.Email, roles);
     }
 
     public async Task<UserResponse?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
@@ -66,6 +110,8 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork
             return null;
         }
 
-        return new UserResponse(user.Id, user.Username, user.Email);
+        var roles = user.Roles.Select(x => x.Name).ToList();
+
+        return new UserResponse(user.Id, user.Username, user.Email, roles);
     }
 }

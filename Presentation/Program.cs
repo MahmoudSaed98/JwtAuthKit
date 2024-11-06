@@ -21,14 +21,6 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandling>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                  .AddJwtBearer();
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("", policy =>
-    {
-        policy.RequireRole("");
-    });
-});
-
 builder.Services.ConfigureJwtOptions();
 
 

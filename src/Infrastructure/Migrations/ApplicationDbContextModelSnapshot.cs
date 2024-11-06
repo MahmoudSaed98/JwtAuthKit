@@ -71,31 +71,12 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int>("Value")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Permissions", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "ReadUser"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "AddUser"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "UpdateUser"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "DeleteUser"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
@@ -144,43 +125,12 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Permissions")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Roles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Registered"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Admin"
-                        });
-                });
-
-            modelBuilder.Entity("Domain.Entities.RolePermission", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("RoleId", "PermissionId");
-
-                    b.HasIndex("PermissionId");
-
-                    b.ToTable("RolePermission");
-
-                    b.HasData(
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 1
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -236,21 +186,6 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.User", null)
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Entities.RolePermission", b =>
-                {
-                    b.HasOne("Domain.Entities.Permission", null)
-                        .WithMany()
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

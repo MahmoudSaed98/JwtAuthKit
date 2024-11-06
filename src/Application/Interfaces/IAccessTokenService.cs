@@ -5,7 +5,7 @@ namespace Application.Interfaces;
 
 public interface IAccessTokenService
 {
-    string? GenerateAccessToken(User user);
+    string GenerateAccessToken(User user);
 
     ClaimsPrincipal GetPrincipalFromExpiredAccessToken(string accessToken);
 

@@ -6,11 +6,12 @@ namespace Presentation.Middlewares;
 public class GlobalExceptionHandling : IExceptionHandler
 {
     private readonly ILogger<GlobalExceptionHandling> _logger;
+
     private readonly ProblemDetailsFactory _problemDetailsFactory;
-    public GlobalExceptionHandling(ILogger<GlobalExceptionHandling> logger,
-        ProblemDetailsFactory problemDetailsFactory)
+    public GlobalExceptionHandling(ILogger<GlobalExceptionHandling> logger, ProblemDetailsFactory problemDetailsFactory)
     {
         _logger = logger;
+
         _problemDetailsFactory = problemDetailsFactory;
     }
 

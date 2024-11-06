@@ -50,20 +50,25 @@ internal sealed class AccessTokenService : IAccessTokenService
 
           new Claim(CustomClaims.Username,user.Username),
 
-          new Claim("sub",user.Id.ToString()),
-
           new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
 
-          new Claim(JwtRegisteredClaimNames.Iat,issuedAtUnix.ToString())
+          new Claim(JwtRegisteredClaimNames.Iat,issuedAtUnix.ToString()),
         ];
 
         if (user.Roles.Any())
         {
+            long combinedPermissions = 0;
+
             foreach (var role in user.Roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role.Name));
+
+                combinedPermissions |= (long)role.Permissions;
             }
+
+            claims.Add(new Claim(CustomClaims.Permissions, combinedPermissions.ToString()));
         }
+
 
 
         var descriptor = new SecurityTokenDescriptor
@@ -85,14 +90,14 @@ internal sealed class AccessTokenService : IAccessTokenService
 
         tokenValidationParameters.ValidateLifetime = false;
 
-        return VlidateAccessToken(accessToken, tokenValidationParameters);
+        return ValidateAccessToken(accessToken, tokenValidationParameters);
     }
 
     private static bool IsTokenHasValidSecurityAlgorithm(SecurityToken token)
     {
-        return token is JwtSecurityToken jwtToken
-               && jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
-               StringComparison.OrdinalIgnoreCase);
+        return
+              token is JwtSecurityToken jwtToken &&
+              jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase);
     }
 
 
@@ -106,7 +111,7 @@ internal sealed class AccessTokenService : IAccessTokenService
         return GetClaim(principal, CustomClaims.Username);
     }
 
-    private ClaimsPrincipal VlidateAccessToken(string accessToken, TokenValidationParameters tokenValidationParameters)
+    private ClaimsPrincipal ValidateAccessToken(string accessToken, TokenValidationParameters tokenValidationParameters)
     {
         var jwtHandler = new JwtSecurityTokenHandler();
 
@@ -124,6 +129,6 @@ internal sealed class AccessTokenService : IAccessTokenService
     public string? GetClaim(ClaimsPrincipal principal, string claimType)
     {
         return principal.Claims
-                        .FirstOrDefault(c => c.Type == claimType)?.Value.Trim();
+              .FirstOrDefault(c => c.Type == claimType)?.Value.Trim();
     }
 }

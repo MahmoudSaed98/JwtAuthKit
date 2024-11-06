@@ -12,22 +12,22 @@ public class Repository<TPrimaryKey, TEntity> :
     public Repository(ApplicationDbContext context) =>
         dbContext = context;
 
-    public void Delete(TEntity entity)
+    public virtual void Delete(TEntity entity)
     {
         dbContext.Set<TEntity>().Remove(entity);
     }
 
-    public async Task<TEntity?> GetByIdAsync(TPrimaryKey key, CancellationToken cancellationToken = default)
+    public virtual async Task<TEntity?> GetByIdAsync(TPrimaryKey key, CancellationToken cancellationToken = default)
     {
         return await dbContext.Set<TEntity>().FindAsync(key, cancellationToken);
     }
 
-    public void Insert(TEntity entity)
+    public virtual void Insert(TEntity entity)
     {
         dbContext.Set<TEntity>().Add(entity);
     }
 
-    public void Update(TEntity entity)
+    public virtual void Update(TEntity entity)
     {
         dbContext.Set<TEntity>().Update(entity);
     }

@@ -2,5 +2,5 @@
 
 public interface IPermissionService
 {
-    Task<HashSet<string>> GetPermissionsAsync(string username);
+    HashSet<string> GetPermissions();
 }

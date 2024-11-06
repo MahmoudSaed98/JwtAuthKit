@@ -18,7 +18,7 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [HasPermission(Permission.ReadUser)]
+    [HasPermission(Permissions.CanRead)]
     [HttpGet("get-user-by-id/{id}")]
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
@@ -27,7 +27,7 @@ public class UserController : ControllerBase
         return user is null ? NotFound("user not found.") : Ok(user);
     }
 
-    [HasPermission(Permission.ReadUser)]
+    [HasPermission(Permissions.CanRead)]
     [HttpGet("get-by-email/{email}")]
     public async Task<IActionResult> GetByEmail(string email, CancellationToken cancellationToken)
     {
@@ -42,7 +42,7 @@ public class UserController : ControllerBase
         return user is null ? NotFound("user not found.") : Ok(user);
     }
 
-    [HasPermission(Permission.ReadUser)]
+    [HasPermission(Permissions.CanRead)]
     [HttpGet("get-by-username/{username}")]
     public async Task<IActionResult> GetByUsername(string username, CancellationToken cancellationToken)
     {
@@ -57,14 +57,40 @@ public class UserController : ControllerBase
     }
 
 
-    [HasPermission(Permission.UpdateUser)]
+    [HasPermission(Permissions.CanUpdate)]
     [HttpPut("change-password")]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken)
     {
-        var success = await _userService.ChangePasswordAsync(request, cancellationToken);
+        var response = await _userService.ChangePasswordAsync(request, cancellationToken);
 
-        return success ? Ok("password has been changed successfully.") :
-                         BadRequest("Invalid Request.");
+        return response.IsSuccess ? Ok(response.Value) : BadRequest(response.Message);
+    }
+
+    [HasPermission(Permissions.CanDelete)]
+    [HttpDelete("delete/{username}")]
+
+    public async Task<IActionResult> DeleteUser(string username, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(username))
+            return BadRequest(new { Error = "username cannot be empty." });
+
+        var response = await _userService.DeleteUserAsync(username, cancellationToken);
+
+        if (response.IsSuccess)
+        {
+            return NoContent();
+        }
+
+        return BadRequest(response.Message);
+    }
+
+    [HasPermission(Permissions.CanRead)]
+    [HttpGet("get-all")]
+
+    public async Task<IActionResult> GetAllUsers(CancellationToken cancellationToken)
+    {
+        var result = await _userService.GetAllUsersAsync(cancellationToken);
+
+        return Ok(result);
     }
 }

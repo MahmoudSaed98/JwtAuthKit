@@ -1,6 +1,7 @@
-﻿using Infrastructure.Authorization.Requirements;
+﻿using Application.Interfaces;
+using Domain.Enums;
+using Infrastructure.Authorization.Requirements;
 using Infrastructure.Claims;
-using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,25 +16,27 @@ internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<Perm
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    protected async override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
+    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
     {
-        string? username = context.User.Claims.
-                FirstOrDefault(claim => claim.Type == CustomClaims.Username)?.Value;
 
-        if (username is null)
+        var combinedPermissionsClaims = context.User.Claims.FirstOrDefault(x => x.Type == CustomClaims.Permissions)?.Value;
+
+        if (!long.TryParse(combinedPermissionsClaims, out long parsedPermissonsValue))
         {
-            return;
+            return Task.CompletedTask;
         }
+
+        var userPermissions = (Permissions)parsedPermissonsValue;
 
         using var scope = _serviceScopeFactory.CreateScope();
 
-        IPermissionService permissionService = scope.ServiceProvider.GetRequiredService<IPermissionService>();
+        var permissionManager = scope.ServiceProvider.GetRequiredService<IPermissionManager>();
 
-        HashSet<string> permissions = await permissionService.GetPermissionsAsync(username);
-
-        if (permissions.Contains(requirement.Permission))
+        if (permissionManager.HasPermission(userPermissions, requirement.Permission))
         {
             context.Succeed(requirement);
         }
+
+        return Task.CompletedTask;
     }
 }

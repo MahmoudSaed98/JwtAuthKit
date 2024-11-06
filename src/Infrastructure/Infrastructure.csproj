@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <Folder Include="Caching\" />
+    <Folder Include="BackgroundServices\" />
     <Folder Include="Settings\" />
   </ItemGroup>
 

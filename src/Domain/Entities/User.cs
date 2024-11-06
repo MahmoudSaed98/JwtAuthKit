@@ -45,4 +45,20 @@ public class User : Entity<int>
         this.Username = username;
     }
 
+    public void AssignRole(Role role)
+    {
+        if (_roles.Contains(role))
+            return;
+
+        _roles.Add(role);
+    }
+
+    public void RemoveRole(Role role)
+    {
+        if (_roles.Contains(role))
+        {
+            _roles.Remove(role);
+        }
+    }
+
 }
