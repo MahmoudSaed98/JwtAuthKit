@@ -4,7 +4,7 @@ using Domain.Enums;
 using Infrastructure.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Presentation.Controllers.V1;
+namespace Presentation.Controllers;
 
 [ApiController]
 [Route("Api/Roles")]

@@ -7,9 +7,4 @@ public static class ApiRoutes
         public const string Register = "users/register";
     }
 
-    public static class Employees
-    {
-        public const string Create = "employees/create";
-    }
-
 }

@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers;
 
+
 [Route("Api/[Controller]")]
+[ApiVersion("1.0")]
 [ApiController]
 public class AuthenticationController : ControllerBase
 {

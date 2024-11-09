@@ -1,6 +1,8 @@
 using Application;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Presentation;
 using Presentation.Extensions;
 using Presentation.Middlewares;
@@ -23,6 +25,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.ConfigureJwtOptions();
 
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new HeaderApiVersionReader("X-Api-Version");
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+});
 
 var app = builder.Build();
 

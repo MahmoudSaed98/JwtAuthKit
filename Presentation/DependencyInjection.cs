@@ -9,10 +9,22 @@ public static class DependencyInjection
     {
         services.AddSwaggerGen(swaggerGenOptions =>
         {
-            swaggerGenOptions.SwaggerDoc("v1", new OpenApiInfo
+            swaggerGenOptions.SwaggerDoc("1.0", new OpenApiInfo
             {
                 Title = "Employees Management API.",
-                Version = "v1",
+                Version = "1.0",
+                Description = "API for managing employee data, roles, and departments",
+                Contact = new OpenApiContact
+                {
+                    Email = "saedm896@gmail.com",
+                    Name = "eng.Mahmoud Saed"
+                }
+            });
+
+            swaggerGenOptions.SwaggerDoc("2.0", new()
+            {
+                Title = "Employees Management API.",
+                Version = "2.0",
                 Description = "API for managing employee data, roles, and departments",
                 Contact = new OpenApiContact
                 {
@@ -49,8 +61,30 @@ public static class DependencyInjection
                   Array.Empty<string>()
               },
             };
-
             swaggerGenOptions.AddSecurityRequirement(securityRequirement);
+
+
+            //swaggerGenOptions.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+
+            //swaggerGenOptions.DocInclusionPredicate((version, apiDesc) =>
+            //{
+
+            //    if (!apiDesc.TryGetMethodInfo(out MethodInfo method))
+            //        return false;
+            //    var methodVersions = method.GetCustomAttributes(true)
+            //        .OfType<ApiVersionAttribute>()
+            //        .SelectMany(attr => attr.Versions);
+
+            //    var controllerVersions = method.DeclaringType?
+            //        .GetCustomAttributes(true)
+            //        .OfType<ApiVersionAttribute>()
+            //        .SelectMany(attr => attr.Versions);
+
+            //    var allVersions = methodVersions.Union(controllerVersions!).Distinct();
+
+            //    return allVersions.Any(v => v.ToString() == version);
+            //});
+
         });
 
         return services;
@@ -61,7 +95,8 @@ public static class DependencyInjection
         app.UseSwagger();
         app.UseSwaggerUI(options =>
         {
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Employee Management API");
+            options.SwaggerEndpoint("/swagger/1.0/swagger.json", "Employee Management API v1.0");
+            // options.SwaggerEndpoint("/swagger/2.0/swagger.json", "Employee Management API v2.0");
         });
 
         return app;

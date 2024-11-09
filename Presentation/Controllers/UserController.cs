@@ -5,8 +5,10 @@ using Infrastructure.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace Presentation.Controllers.V1;
+namespace Presentation.Controllers;
 
+[ApiVersion(ApiVersions.V1, Deprecated = true)]
+[ApiVersion(ApiVersions.V2)]
 [Route("api/[Controller]")]
 [ApiController]
 public class UserController : ControllerBase
