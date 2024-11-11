@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
 using Domain.Abstractions;
 using Domain.Entities;
+using Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 

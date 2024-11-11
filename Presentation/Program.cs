@@ -25,6 +25,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.ConfigureJwtOptions();
 
+builder.Services.AddLogging();
+
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddApiVersioning(options =>
 {
     options.AssumeDefaultVersionWhenUnspecified = true;

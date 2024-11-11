@@ -8,6 +8,7 @@ public class User : Entity<int>
     public string Username { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;
+    public bool EmailVerified { get; private set; }
     public IReadOnlyList<RefreshToken> RefreshTokens => _refreshTokens;
     public IReadOnlyList<Role> Roles => _roles;
     private User(string username, string passwordHash, string email)
@@ -43,6 +44,11 @@ public class User : Entity<int>
         ArgumentException.ThrowIfNullOrEmpty(username, nameof(username));
 
         this.Username = username;
+    }
+
+    public void SetEmailVerified(bool  verified)
+    {
+        this.EmailVerified = verified;
     }
 
     public void AssignRole(Role role)

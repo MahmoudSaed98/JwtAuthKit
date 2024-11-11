@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers;
 
-
 [Route("Api/[Controller]")]
 [ApiVersion("1.0")]
 [ApiController]
@@ -66,5 +65,13 @@ public class AuthenticationController : ControllerBase
         }
 
         return NotFound(response.Message);
+    }
+
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> VerifyEmail(string token)
+    {
+        var response = await _authenticationService.VerifyEmailAsync(token);
+
+        return response ? Ok("email confirmed successfully") : BadRequest("invalid or expired token");
     }
 }

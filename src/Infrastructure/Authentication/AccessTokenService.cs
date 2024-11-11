@@ -3,6 +3,7 @@ using Domain.Abstractions;
 using Domain.Entities;
 using Infrastructure.Claims;
 using Infrastructure.Exceptions;
+using Infrastructure.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

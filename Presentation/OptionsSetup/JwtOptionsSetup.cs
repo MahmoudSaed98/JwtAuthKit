@@ -1,4 +1,4 @@
-﻿using Infrastructure.Authentication;
+﻿using Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 
 namespace Presentation.OptionsSetup;

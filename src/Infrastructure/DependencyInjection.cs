@@ -1,10 +1,12 @@
 ﻿using Application.Interfaces;
+using Application.Services;
 using Domain.Abstractions;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization.Handlers;
 using Infrastructure.Data.DbContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
+using Infrastructure.Settings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +18,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        var emailSettings = new EmailSettings();
+
+        configuration.GetSection(EmailSettings.SectionName).Bind(emailSettings);
+
         var connectionString = configuration.GetConnectionString("Default");
 
         ArgumentNullException.ThrowIfNull(nameof(connectionString));
@@ -40,7 +46,11 @@ public static class DependencyInjection
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
-        // services.AddScoped<Infrastructure.Services.IPermissionService, PermissionService>();
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
+        services.AddScoped<IEmailVerificationLinkFactory, EmailVerificationLinkFactory>();
+        services.AddFluentEmail(emailSettings.SenderEmail, emailSettings.SenderName)
+                 .AddSmtpSender(emailSettings.SmtpServer, emailSettings.Port, emailSettings.Username, emailSettings.Password);
 
         return services;
     }

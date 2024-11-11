@@ -17,4 +17,5 @@ public interface IUserService
     Task<Result<string>> ChangePasswordAsync(ChangePasswordRequest request, CancellationToken cancellationToken = default);
 
     Task<Result<string>> DeleteUserAsync(string usrname, CancellationToken cancellationToken = default);
+
 }

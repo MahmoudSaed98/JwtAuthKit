@@ -7,8 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers;
 
-[ApiVersion(ApiVersions.V1, Deprecated = true)]
-[ApiVersion(ApiVersions.V2)]
+[ApiVersion(ApiVersions.V1)]
 [Route("api/[Controller]")]
 [ApiController]
 public class UserController : ControllerBase
@@ -95,4 +94,6 @@ public class UserController : ControllerBase
 
         return Ok(result);
     }
+
+
 }

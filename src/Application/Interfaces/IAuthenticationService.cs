@@ -10,6 +10,8 @@ public interface IAuthenticationService
 
     Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
 
+    Task<bool> VerifyEmailAsync(string verificationToken, CancellationToken cancellationToken = default);
+
     Task<Result<string>> RevokeRefreshTokenAsync(RevokeRefreshTokenRequest request, CancellationToken cancellationToken = default);
 
     Task<Result<RefreshTokenResponse>> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default);
