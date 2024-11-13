@@ -14,6 +14,9 @@ public static class DependencyInjection
         services.AddScoped<IPermissionManager, PermissionManager>();
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailContentGenerator, EmailContentGenerator>();
+        services.AddScoped<IVerificationTokenGenerator, VerificationTokenGenerator>();
         services.AddValidatorsFromAssembly(ApplicationAssemblyReference.Assembly);
         return services;
     }

@@ -13,4 +13,7 @@ public class EmailVerificationToken : Entity<int>
     public static EmailVerificationToken Create(int userId, string token, DateTime createdAt, DateTime expiresAt) =>
                                          new(userId, token, createdAt, expiresAt);
 
+    private EmailVerificationToken() { }
+
+    public static EmailVerificationToken Default => new();
 }

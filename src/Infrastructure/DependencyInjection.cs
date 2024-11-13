@@ -1,5 +1,4 @@
 ﻿using Application.Interfaces;
-using Application.Services;
 using Domain.Abstractions;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization.Handlers;
@@ -46,11 +45,12 @@ public static class DependencyInjection
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
-        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
-        services.AddScoped<IEmailVerificationLinkFactory, EmailVerificationLinkFactory>();
+        services.AddScoped<ILinkService, LinkService>();
+
         services.AddFluentEmail(emailSettings.SenderEmail, emailSettings.SenderName)
-                 .AddSmtpSender(emailSettings.SmtpServer, emailSettings.Port, emailSettings.Username, emailSettings.Password);
+                 .AddSmtpSender(emailSettings.SmtpServer, emailSettings.Port);
 
         return services;
     }

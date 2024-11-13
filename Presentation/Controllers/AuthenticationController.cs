@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Requests;
+﻿using Application.Common;
+using Application.DTOs.Requests;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,9 +11,11 @@ namespace Presentation.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly IAuthenticationService _authenticationService;
-    public AuthenticationController(IAuthenticationService authenticationService)
+    private readonly LinkGenerator _linkGenerator;
+    public AuthenticationController(IAuthenticationService authenticationService, LinkGenerator linkGenerator)
     {
         _authenticationService = authenticationService;
+        _linkGenerator = linkGenerator;
     }
 
     [HttpPost("login")]
@@ -67,11 +70,13 @@ public class AuthenticationController : ControllerBase
         return NotFound(response.Message);
     }
 
-    [HttpPost("verify-email")]
+    [HttpGet("verify-email", Name = EndpointNames.VerifyEmail)]
     public async Task<IActionResult> VerifyEmail(string token)
     {
         var response = await _authenticationService.VerifyEmailAsync(token);
 
         return response ? Ok("email confirmed successfully") : BadRequest("invalid or expired token");
     }
+
+
 }

@@ -1,9 +1,9 @@
-﻿using Application.Interfaces;
+﻿using Domain.Abstractions;
 using FluentEmail.Core;
 
 namespace Infrastructure.Services;
 
-internal sealed class EmailService(IFluentEmail fluentEmail) : IEmailService
+internal sealed class EmailSender(IFluentEmail fluentEmail) : IEmailSender
 {
     public async Task SendEmailAsync(string toEmail, string subject, string message, CancellationToken cancellationToken = default)
     {

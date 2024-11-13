@@ -16,8 +16,8 @@ internal sealed class AuthenticationService : IAuthenticationService
     private readonly IAccessTokenService _accessTokenService;
     private readonly IRefreshTokenService _refreshTokenService;
     private readonly IEmailService _emailService;
-    private readonly IEmailVerificationLinkFactory _verificationLinkFactory;
     private readonly IEmailVerificationTokenRepository _verificationTokenRepository;
+    private readonly IVerificationTokenGenerator _verificationTokenGenerator;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AuthenticationService> _logger;
     public AuthenticationService(IUserRepository userRepository,
@@ -25,20 +25,20 @@ internal sealed class AuthenticationService : IAuthenticationService
         IAccessTokenService accessTokenService,
         IRefreshTokenService refreshTokenService,
         IEmailService emailService,
-        IEmailVerificationLinkFactory verificationLinkFactory,
         IUnitOfWork unitOfWork,
         IEmailVerificationTokenRepository emailVerificationTokenRepository,
-        ILogger<AuthenticationService> logger)
+        ILogger<AuthenticationService> logger,
+        IVerificationTokenGenerator verificationTokenGenerator)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _accessTokenService = accessTokenService;
         _refreshTokenService = refreshTokenService;
         _emailService = emailService;
-        _verificationLinkFactory = verificationLinkFactory;
         _unitOfWork = unitOfWork;
         _verificationTokenRepository = emailVerificationTokenRepository;
         _logger = logger;
+        _verificationTokenGenerator = verificationTokenGenerator;
     }
 
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
@@ -125,41 +125,35 @@ internal sealed class AuthenticationService : IAuthenticationService
 
         var user = User.Create(request.Username, passwordHash, request.Email);
 
-        _userRepository.Insert(user);
+        var verificationToken = EmailVerificationToken.Default;
 
-        string token = GenerateVirificationToken();
-
-        var verificationToken = EmailVerificationToken.Create(user.Id, token, DateTime.Now, DateTime.Now.AddMinutes(15));
-
-        _verificationTokenRepository.Insert(verificationToken);
-
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        var virificationLink = _verificationLinkFactory.Create(verificationToken);
-
-        string emailContent = GenerateEmailContent(virificationLink);
+        using var transaction = _unitOfWork.BeginTransaction();
 
         try
         {
-            await _emailService.SendEmailAsync(user.Email, "email verification", emailContent, cancellationToken);
+            _userRepository.Insert(user);
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            verificationToken = EmailVerificationToken.Create(user.Id, _verificationTokenGenerator.GenerateToken(), DateTime.Now, DateTime.Now.AddMinutes(15));
+
+            _verificationTokenRepository.Insert(verificationToken);
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await _emailService.SendVerificationEmailAsync(user, verificationToken, cancellationToken);
+
+            transaction.Commit();
         }
         catch (Exception e)
         {
-            _logger.LogError("error sending email :{0}", e.Message);
+            _logger.LogError("An error occurred during user registration: {0}", e.Message);
+
+            transaction.Rollback();
             throw;
         }
 
         return Result<UserResponse>.Success(new UserResponse(user.Id, user.Username, user.Email, []));
-    }
-
-    private static string GenerateEmailContent(string virificationLink)
-    {
-        return $"to verify your email address <a href ='{virificationLink}'> click here </a>";
-    }
-
-    private static string GenerateVirificationToken()
-    {
-        return Guid.NewGuid().ToString("N").Substring(0, 8);
     }
 
     public async Task<Result<string>> RevokeRefreshTokenAsync(RevokeRefreshTokenRequest request, CancellationToken cancellationToken = default)
