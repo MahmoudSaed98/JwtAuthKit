@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Repositories;
 
 internal sealed class EmailVerificationTokenRepository : Repository<int,
-    EmailVerificationToken>, IEmailVerificationTokenRepository
+    EmailVerificationToken>, IConfirmationTokenRepository
 {
     public EmailVerificationTokenRepository(ApplicationDbContext context) :
         base(context)

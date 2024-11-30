@@ -12,6 +12,8 @@ public interface IAuthenticationService
 
     Task<bool> VerifyEmailAsync(string verificationToken, CancellationToken cancellationToken = default);
 
+    Task<Result<string>> ResendVerificationEmailAsync(int userId, CancellationToken cancellationToken = default);
+
     Task<Result<string>> RevokeRefreshTokenAsync(RevokeRefreshTokenRequest request, CancellationToken cancellationToken = default);
 
     Task<Result<RefreshTokenResponse>> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default);

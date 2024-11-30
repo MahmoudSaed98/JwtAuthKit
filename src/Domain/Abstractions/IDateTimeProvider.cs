@@ -2,5 +2,5 @@
 
 public interface IDateTimeProvider
 {
-    DateTime UtcNow { get; }
+    DateTime DateTime { get; }
 }

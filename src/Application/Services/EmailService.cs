@@ -1,4 +1,4 @@
-﻿using Application.Common;
+﻿using Application.Common.Constants;
 using Application.Interfaces;
 using Domain.Abstractions;
 using Domain.Entities;
@@ -9,17 +9,14 @@ internal class EmailService : IEmailService
 {
     private readonly IEmailSender _emailSender;
     private readonly ILinkService _linkGenerator;
-    private readonly IVerificationTokenGenerator _verificationTokenGenerator;
     private readonly IEmailContentGenerator _emailContentGenerator;
 
     public EmailService(IEmailSender emailSender,
         ILinkService linkGenerator,
-        IVerificationTokenGenerator verificationTokenGenerator,
         IEmailContentGenerator emailContentGenerator)
     {
         _emailSender = emailSender;
         _linkGenerator = linkGenerator;
-        _verificationTokenGenerator = verificationTokenGenerator;
         _emailContentGenerator = emailContentGenerator;
     }
 

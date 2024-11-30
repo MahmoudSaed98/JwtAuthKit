@@ -1,4 +1,4 @@
-﻿namespace Application.Common;
+﻿namespace Application.Common.Constants;
 
 public static class EndpointNames
 {

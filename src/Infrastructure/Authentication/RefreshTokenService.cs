@@ -33,11 +33,11 @@ internal sealed class RefreshTokenService : IRefreshTokenService
 
     public RefreshToken GenerateRefreshToken(int userId)
     {
-        var expires = _dateTimeProvider.UtcNow.AddMinutes(_jwtSettings.RefreshTokenExpirationInMinutes);
+        var expires = _dateTimeProvider.DateTime.AddMinutes(_jwtSettings.RefreshTokenExpirationInMinutes);
 
         string generatedRefreshTokenValue = GenerateRefreshTokenInternal();
 
-        var newRefreshToken = RefreshToken.Create(generatedRefreshTokenValue, userId, _dateTimeProvider.UtcNow, expires);
+        var newRefreshToken = RefreshToken.Create(generatedRefreshTokenValue, userId, _dateTimeProvider.DateTime, expires);
 
         _refreshTokenRepository.Insert(newRefreshToken);
 

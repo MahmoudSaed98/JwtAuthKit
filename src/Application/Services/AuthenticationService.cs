@@ -1,4 +1,5 @@
 ﻿using Application.Common;
+using Application.Common.Constants;
 using Application.DTOs.Requests;
 using Application.DTOs.Responses;
 using Application.Interfaces;
@@ -16,8 +17,8 @@ internal sealed class AuthenticationService : IAuthenticationService
     private readonly IAccessTokenService _accessTokenService;
     private readonly IRefreshTokenService _refreshTokenService;
     private readonly IEmailService _emailService;
-    private readonly IEmailVerificationTokenRepository _verificationTokenRepository;
-    private readonly IVerificationTokenGenerator _verificationTokenGenerator;
+    private readonly IConfirmationTokenRepository _confirmationTokenRepository;
+    private readonly IEmailConfirmationTokenProvider _emailConfirmationTokenProvider;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AuthenticationService> _logger;
     public AuthenticationService(IUserRepository userRepository,
@@ -26,9 +27,9 @@ internal sealed class AuthenticationService : IAuthenticationService
         IRefreshTokenService refreshTokenService,
         IEmailService emailService,
         IUnitOfWork unitOfWork,
-        IEmailVerificationTokenRepository emailVerificationTokenRepository,
+        IConfirmationTokenRepository emailVerificationTokenRepository,
         ILogger<AuthenticationService> logger,
-        IVerificationTokenGenerator verificationTokenGenerator)
+        IEmailConfirmationTokenProvider emailConfirmationTokenProvider)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
@@ -36,9 +37,9 @@ internal sealed class AuthenticationService : IAuthenticationService
         _refreshTokenService = refreshTokenService;
         _emailService = emailService;
         _unitOfWork = unitOfWork;
-        _verificationTokenRepository = emailVerificationTokenRepository;
+        _confirmationTokenRepository = emailVerificationTokenRepository;
         _logger = logger;
-        _verificationTokenGenerator = verificationTokenGenerator;
+        _emailConfirmationTokenProvider = emailConfirmationTokenProvider;
     }
 
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
@@ -125,7 +126,7 @@ internal sealed class AuthenticationService : IAuthenticationService
 
         var user = User.Create(request.Username, passwordHash, request.Email);
 
-        var verificationToken = EmailVerificationToken.Default;
+        var confirmationToken = EmailVerificationToken.Default;
 
         using var transaction = _unitOfWork.BeginTransaction();
 
@@ -135,13 +136,13 @@ internal sealed class AuthenticationService : IAuthenticationService
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            verificationToken = EmailVerificationToken.Create(user.Id, _verificationTokenGenerator.GenerateToken(), DateTime.Now, DateTime.Now.AddMinutes(15));
+            confirmationToken = EmailVerificationToken.Create(user.Id, _emailConfirmationTokenProvider.GenerateToken(), DateTime.Now, DateTime.Now.AddMinutes(2));
 
-            _verificationTokenRepository.Insert(verificationToken);
+            _confirmationTokenRepository.Insert(confirmationToken);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            await _emailService.SendVerificationEmailAsync(user, verificationToken, cancellationToken);
+            await _emailService.SendVerificationEmailAsync(user, confirmationToken, cancellationToken);
 
             transaction.Commit();
         }
@@ -154,6 +155,34 @@ internal sealed class AuthenticationService : IAuthenticationService
         }
 
         return Result<UserResponse>.Success(new UserResponse(user.Id, user.Username, user.Email, []));
+    }
+
+    public async Task<Result<string>> ResendVerificationEmailAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+
+        if (user is null)
+        {
+            return Result<string>.Failure($"user with id {userId} does not exist.");
+        }
+
+        var newVerificationToken = EmailVerificationToken.Create(userId, _emailConfirmationTokenProvider.GenerateToken(), createdAt: DateTime.Now, expiresAt: DateTime.Now.AddMinutes(2));
+
+        _confirmationTokenRepository.Insert(newVerificationToken);
+
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "an error occurred while saving a new confirmation email token.");
+            throw;
+        }
+
+        await _emailService.SendVerificationEmailAsync(user, newVerificationToken, cancellationToken);
+
+        return Result<string>.Success("a new confirmation email has been sent to your registered email address");
     }
 
     public async Task<Result<string>> RevokeRefreshTokenAsync(RevokeRefreshTokenRequest request, CancellationToken cancellationToken = default)
@@ -172,10 +201,10 @@ internal sealed class AuthenticationService : IAuthenticationService
         return Result<string>.Success("Refresh token has been revoked successfully.");
     }
 
-    public async Task<bool> VerifyEmailAsync(string verificationToken, CancellationToken cancellationToken = default)
+    public async Task<bool> VerifyEmailAsync(string confirmationToken, CancellationToken cancellationToken = default)
     {
 
-        var storedToken = await _verificationTokenRepository.GetAsync(verificationToken, cancellationToken);
+        var storedToken = await _confirmationTokenRepository.GetAsync(confirmationToken, cancellationToken);
 
         if (storedToken is null || storedToken.ExpiresAt < DateTime.Now || storedToken.User.EmailVerified)
         {
@@ -184,7 +213,7 @@ internal sealed class AuthenticationService : IAuthenticationService
 
         storedToken.User.SetEmailVerified(true);
 
-        _verificationTokenRepository.Delete(storedToken);
+        _confirmationTokenRepository.Delete(storedToken);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

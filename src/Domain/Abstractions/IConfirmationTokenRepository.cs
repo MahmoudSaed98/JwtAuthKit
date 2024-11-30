@@ -2,7 +2,7 @@
 
 namespace Domain.Abstractions;
 
-public interface IEmailVerificationTokenRepository :
+public interface IConfirmationTokenRepository :
     IRepository<int, EmailVerificationToken>
 {
     Task<EmailVerificationToken?> GetByUserIdAsync(int userId, CancellationToken cancellationToken = default);

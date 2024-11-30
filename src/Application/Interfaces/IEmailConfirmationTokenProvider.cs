@@ -1,6 +1,6 @@
 ﻿namespace Application.Interfaces;
 
-public interface IVerificationTokenGenerator
+public interface IEmailConfirmationTokenProvider
 {
     string GenerateToken();
 }

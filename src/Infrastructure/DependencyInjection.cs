@@ -46,7 +46,7 @@ public static class DependencyInjection
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
         services.AddScoped<IEmailSender, EmailSender>();
-        services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
+        services.AddScoped<IConfirmationTokenRepository, EmailVerificationTokenRepository>();
         services.AddScoped<ILinkService, LinkService>();
 
         services.AddFluentEmail(emailSettings.SenderEmail, emailSettings.SenderName)

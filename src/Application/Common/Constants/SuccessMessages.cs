@@ -1,4 +1,4 @@
-﻿namespace Application.Common;
+﻿namespace Application.Common.Constants;
 
 internal static class SuccessMessages
 {

@@ -8,6 +8,6 @@ public static class RefreshTokenExtensions
     {
         ArgumentNullException.ThrowIfNull(token, nameof(token));
 
-        return token.IsRevoked || token.RevokedAt < DateTime.UtcNow;
+        return token.IsRevoked || token.RevokedAt > DateTime.UtcNow;
     }
 }

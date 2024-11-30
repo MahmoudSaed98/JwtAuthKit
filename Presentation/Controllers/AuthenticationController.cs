@@ -1,4 +1,4 @@
-﻿using Application.Common;
+﻿using Application.Common.Constants;
 using Application.DTOs.Requests;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +11,10 @@ namespace Presentation.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly IAuthenticationService _authenticationService;
-    private readonly LinkGenerator _linkGenerator;
-    public AuthenticationController(IAuthenticationService authenticationService, LinkGenerator linkGenerator)
+    public AuthenticationController(IAuthenticationService authenticationService)
     {
         _authenticationService = authenticationService;
-        _linkGenerator = linkGenerator;
+
     }
 
     [HttpPost("login")]
@@ -77,6 +76,4 @@ public class AuthenticationController : ControllerBase
 
         return response ? Ok("email confirmed successfully") : BadRequest("invalid or expired token");
     }
-
-
 }
