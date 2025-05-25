@@ -1,5 +1,7 @@
 # 🔐 ASP.NET Core 8 JWT Authentication & Authorization API
 
+![image alt](https://github.com/CoderMahmoud/JwtDemo/blob/17e7c3cfddf732528bdcc3fb8177611528080c02/logo.png).
+
 ## Overview
 
 This repository implements a **complete and secure Authentication & Authorization system** in **ASP.NET Core Web API (.NET 8)** using **JWT**. It includes:
