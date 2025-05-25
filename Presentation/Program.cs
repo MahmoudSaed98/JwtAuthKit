@@ -1,5 +1,6 @@
 using Application;
 using Infrastructure;
+using Infrastructure.BackgroundServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
@@ -36,6 +37,8 @@ builder.Services.AddApiVersioning(options =>
     options.ApiVersionReader = new HeaderApiVersionReader("X-Api-Version");
     options.DefaultApiVersion = new ApiVersion(1, 0);
 });
+
+builder.Services.AddHostedService<RemoveExpiredEmailVerificationTokensBackgroundService>();
 
 var app = builder.Build();
 

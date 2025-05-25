@@ -49,9 +49,9 @@ internal sealed class RefreshTokenRepository : IRefreshTokenRepository
     public async Task<bool> RevokeAllRefreshTokensForUserAsync(int userId, CancellationToken cancellationToken = default)
     {
         int affectedRows = await _dbContext.Set<RefreshToken>()
-                          .Where(r => r.UserId == userId && !r.IsRevoked)
-       .ExecuteUpdateAsync(tokenProperty => tokenProperty.SetProperty(token => token.IsRevoked, true)
-                          .SetProperty(token => token.RevokedAt, DateTime.UtcNow));
+                                           .Where(r => r.UserId == userId && !r.IsRevoked)
+                                           .ExecuteUpdateAsync(tokenProperty => tokenProperty.SetProperty(token => token.IsRevoked, true)
+                                           .SetProperty(token => token.RevokedAt, DateTime.UtcNow));
 
         return affectedRows > 0;
     }
